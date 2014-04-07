@@ -1,0 +1,19 @@
+{
+  "name": "grunt-hasher",
+  "version": "0.0.1",
+  "description": "Create hashes for files",
+  "main": "hasher.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/devote/grunt-hasher.git"
+  },
+  "keywords": [
+    "node.js",
+    "javascript",
+    "grunt",
+    "hashes",
+    "devote"
+  ],
+  "author": "Dmitrii Pakhtinov",
+  "license": "MIT"
+}
