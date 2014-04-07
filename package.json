@@ -15,5 +15,9 @@
     "devote"
   ],
   "author": "Dmitrii Pakhtinov",
-  "license": "MIT"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devote/grunt-hasher/issues"
+  },
+  "homepage": "https://github.com/devote/grunt-hasher"
 }
