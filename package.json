@@ -1,6 +1,6 @@
 {
   "name": "grunt-hasher",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Create hashes for files",
   "main": "hasher.js",
   "repository": {

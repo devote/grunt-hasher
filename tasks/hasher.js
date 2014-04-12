@@ -1,5 +1,5 @@
 /*!
- * hasher plugin for Grunt - v0.0.1
+ * hasher plugin for Grunt - v0.1.0
  *
  * Copyright 2011-2014, Dmitrii Pakhtinov ( spb.piksel@gmail.com )
  *
@@ -7,7 +7,7 @@
  *
  * MIT licenses: http://www.opensource.org/licenses/mit-license.php
  *
- * Update: 2014-04-07 14:53
+ * Update: 2014-04-12 22:03
  */
 module.exports = function(grunt) {
   "use strict";
@@ -24,19 +24,27 @@ module.exports = function(grunt) {
     return path.split("\\").join("/");
   };
 
+  function writeFile(dest, content, options, src) {
+    grunt.file.write(dest, content, {encoding: options.encoding});
+    if ((src && options.mode === true) || (options.mode !== true && options.mode !== false)) {
+      fs.chmodSync(dest, (options.mode === true) ? fs.lstatSync(src).mode : options.mode);
+    }
+  };
+
   grunt.registerMultiTask("hasher", "Create hashes for files", function() {
     var options = this.options({
+        mode: false,
         algorithm: "md5",
         outputMode: "text",
-        outputType: "hex",
+        outputDigest: "hex",
         outputTextFormat: "{HASH} *{SRC}",
         outputFilenameFormat: "{BASENAME}.{HASH}{EXT}",
-        srcEncoding: "binary",
+        encoding: grunt.file.defaultEncoding,
         hashLength: null,
-        hashFunction: function(source, algorithm, outputType, srcEncoding) {
+        hashFunction: function(source, algorithm, outputDigest, encoding) {
           var hash = crypto.createHash(algorithm);
-          hash.update(source, srcEncoding);
-          return hash.digest(outputType);
+          hash.update(source, encoding);
+          return outputDigest && outputDigest !== 'none' ? hash.digest(outputDigest) : hash;
         }
     });
 
@@ -56,8 +64,8 @@ module.exports = function(grunt) {
 
       file.src.forEach(function(src) {
         var src = unixify(src);
-        var source = grunt.file.read(src, {encoding: options.srcEncoding});
-        var hash = options.hashFunction(source, options.algorithm, options.outputType, options.srcEncoding);
+        var source = grunt.file.read(src, {encoding: options.encoding});
+        var hash = options.hashFunction(source, options.algorithm, options.outputDigest, options.encoding);
         var ext = path.extname(src);
         var basename = path.basename(src, ext);
 
@@ -68,10 +76,10 @@ module.exports = function(grunt) {
         }
 
         if (isDestDir) {
-          grunt.file.write(path.join(dest, applyFormat(options.outputFilenameFormat, hash, src, basename, ext)), source, {encoding: options.srcEncoding});
+          writeFile(path.join(dest, applyFormat(options.outputFilenameFormat, hash, src, basename, ext)), source, options, src);
         } else if (destBasename === "*") {
           file = unixify(path.join(dest, basename + destExt));
-          grunt.file.write(file, applyFormat(options.outputTextFormat, hash, src, basename, ext), {encoding: options.srcEncoding});
+          writeFile(file, applyFormat(options.outputTextFormat, hash, src, basename, ext), options, src);
         } else {
           file = unixify(path.join(dest, destBasename + destExt));
           if (typeof maps[file] === "undefined") {
@@ -88,7 +96,7 @@ module.exports = function(grunt) {
 
     for(var key in maps) {
       if (maps.hasOwnProperty(key)) {
-        grunt.file.write(key, isOutJson ? JSON.stringify(maps[key], null, "  ") : maps[key]);
+        writeFile(key, isOutJson ? JSON.stringify(maps[key], null, "  ") : maps[key], options);
       }
     }
   });
